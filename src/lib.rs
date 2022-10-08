@@ -1,16 +1,25 @@
 #![feature(portable_simd)]
 
-use rand::prelude::*;
 use std::collections::HashMap;
-
 use std::simd::{i32x16, Simd};
 
-pub struct TestCase {
-    pub target: i32,
-    pub v: Vec<i32>,
+mod gen;
+pub use gen::{gen, Policy};
+
+// basic linear
+pub fn two_sum_linear(target: i32, arr: &[i32]) -> (usize, usize) {
+    for (i, left) in arr.iter().enumerate() {
+        for (j, right) in arr.iter().skip(i).enumerate() {
+            if left + right == target {
+                return (i, i + j);
+            }
+        }
+    }
+    (0, 0)
 }
 
-pub fn two_sum_linear(target: i32, arr: &[i32]) -> (usize, usize) {
+// linear using AVX-512 SIMD
+pub fn two_sum_linear_simd(target: i32, arr: &[i32]) -> (usize, usize) {
     const LANES: usize = 16;
     for (i, left) in arr.iter().enumerate() {
         let need = target - left;
@@ -40,6 +49,7 @@ pub fn two_sum_linear(target: i32, arr: &[i32]) -> (usize, usize) {
     (0, 0)
 }
 
+// map
 pub fn two_sum_map(target: i32, arr: &[i32]) -> (usize, usize) {
     let mut m = HashMap::new();
     for (i, val) in arr.iter().enumerate() {
@@ -53,30 +63,15 @@ pub fn two_sum_map(target: i32, arr: &[i32]) -> (usize, usize) {
     (0, 0)
 }
 
-// make a test case
-pub fn gen(n: usize) -> TestCase {
-    let mut rng = rand::thread_rng();
-    let mut v = Vec::with_capacity(n as usize);
-    let max = (i32::MAX / 2 - 1) as i32;
-    for _ in 0..n {
-        v.push(rng.gen_range(0..max));
+// basic linear but pad data so that each value is in it's own cache line
+// Needs gen by 16 too
+pub fn _two_sum_linear_pad(target: i32, arr: &[i32]) -> (usize, usize) {
+    for (i, left) in arr.iter().step_by(16).enumerate() {
+        for (j, right) in arr.iter().step_by(16).skip(i).enumerate() {
+            if left + right == target {
+                return (i * 16, i * 16 + j * 16);
+            }
+        }
     }
-    //let target = gen_rand_target(rng, &v);
-    let target = gen_mid_target(&v);
-    TestCase { target, v }
-}
-
-fn _gen_rand_target<T: Rng>(mut rng: T, v: &[i32]) -> i32 {
-    let p1: usize = rng.gen_range(0..v.len());
-    let p2: usize = rng.gen_range(0..v.len());
-    v[p1] + v[p2]
-}
-
-fn _gen_last_target(v: &[i32]) -> i32 {
-    v[v.len() - 1] + v[v.len() - 2]
-}
-
-fn gen_mid_target(v: &[i32]) -> i32 {
-    let mid = v.len() / 2;
-    v[mid - 1] + v[mid + 1]
+    (0, 0)
 }

@@ -1,0 +1,67 @@
+ Performance counter stats for './target/release/two_sum 300 l':
+
+         60,243.87 msec task-clock                #    1.000 CPUs utilized          
+               304      context-switches          #    5.046 /sec                   
+                 0      cpu-migrations            #    0.000 /sec                   
+                75      page-faults               #    1.245 /sec                   
+    72,124,912,284      cycles                    #    1.197 GHz                    
+   374,205,673,499      instructions              #    5.19  insn per cycle         
+   101,716,343,990      branches                  #    1.688 G/sec                  
+       152,032,757      branch-misses             #    0.15% of all branches        
+   360,624,561,420      slots                     #    5.986 G/sec                  
+   267,075,091,601      topdown-retiring          #     73.8% retiring              
+    19,798,995,528      topdown-bad-spec          #      5.5% bad speculation       
+    73,539,126,250      topdown-fe-bound          #     20.3% frontend bound        
+     1,414,213,966      topdown-be-bound          #      0.4% backend bound         
+
+      60.248690210 seconds time elapsed
+
+      60.047068000 seconds user
+       0.003609000 seconds sys
+
+---
+
+ Performance counter stats for './target/release/two_sum 300 m':
+
+         61,504.91 msec task-clock                #    1.000 CPUs utilized          
+               361      context-switches          #    5.869 /sec                   
+                 1      cpu-migrations            #    0.016 /sec                   
+                79      page-faults               #    1.284 /sec                   
+    73,634,185,028      cycles                    #    1.197 GHz                    
+   157,923,601,609      instructions              #    2.14  insn per cycle         
+    16,173,504,589      branches                  #  262.963 M/sec                  
+       156,325,668      branch-misses             #    0.97% of all branches        
+   368,170,925,140      slots                     #    5.986 G/sec                  
+   157,444,278,685      topdown-retiring          #     42.8% retiring              
+    34,651,381,189      topdown-bad-spec          #      9.4% bad speculation       
+    17,325,690,594      topdown-fe-bound          #      4.7% frontend bound        
+   158,818,830,452      topdown-be-bound          #     43.1% backend bound         
+
+      61.511974955 seconds time elapsed
+
+      61.296697000 seconds user
+       0.002638000 seconds sys
+
+---
+
+ Performance counter stats for './target/release/two_sum 300 s':
+
+          8,556.33 msec task-clock                #    1.000 CPUs utilized          
+                52      context-switches          #    6.077 /sec                   
+                 0      cpu-migrations            #    0.000 /sec                   
+                75      page-faults               #    8.765 /sec                   
+    10,243,713,029      cycles                    #    1.197 GHz                    
+    40,803,747,059      instructions              #    3.98  insn per cycle         
+    10,897,413,833      branches                  #    1.274 G/sec                  
+         2,801,760      branch-misses             #    0.03% of all branches        
+    51,218,565,145      slots                     #    5.986 G/sec                  
+    36,566,963,083      topdown-retiring          #     71.3% retiring              
+     1,606,856,945      topdown-bad-spec          #      3.1% bad speculation       
+    13,066,952,341      topdown-fe-bound          #     25.5% frontend bound        
+        29,418,976      topdown-be-bound          #      0.1% backend bound         
+
+       8.557783540 seconds time elapsed
+
+       8.527491000 seconds user
+       0.001599000 seconds sys
+

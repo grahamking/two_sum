@@ -1,13 +1,25 @@
-use two_sum::{gen, two_sum_linear, two_sum_map};
+#![feature(bench_black_box)]
+
+use core::hint::black_box;
+use two_sum::{gen, two_sum_linear, two_sum_linear_simd, two_sum_map, Policy};
+
+const REPS: usize = 1_000_000;
 
 fn main() {
     let mut args = std::env::args().skip(1);
-    let t = gen(args.next().unwrap().parse().unwrap());
+    let t = gen(args.next().unwrap().parse().unwrap(), Policy::Mid);
 
-    let res = match args.next().unwrap().as_str() {
-        "l" => two_sum_linear(t.target, &t.v),
-        "m" => two_sum_map(t.target, &t.v),
-        _ => panic!("two_sum n l|m"),
+    let func = match args.next().unwrap().as_str() {
+        "l" => two_sum_linear,
+        "s" => two_sum_linear_simd,
+        "m" => two_sum_map,
+        _ => panic!("two_sum n l|s|m"),
     };
+    let mut res = (0, 0);
+    for _ in 0..REPS {
+        res = func(t.target, &t.v);
+        black_box(res);
+    }
+
     println!("{} {res:?}={}", t.target, t.v[res.0] + t.v[res.1],);
 }
