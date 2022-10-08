@@ -3,7 +3,7 @@ use two_sum::{gen, two_sum_linear, two_sum_map};
 
 pub fn two_sum(c: &mut Criterion) {
     let mut group = c.benchmark_group("two_sum");
-    for i in (250..=10_000).step_by(250) {
+    for i in (250..=3_000).step_by(250) {
         let t = gen(i);
         group.bench_function(BenchmarkId::new("linear", i), |b| {
             b.iter(|| black_box(two_sum_linear(t.target, &t.v)))
