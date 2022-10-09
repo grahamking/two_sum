@@ -1,15 +1,27 @@
 #![feature(portable_simd)]
 
 use std::collections::HashMap;
-use std::simd::{i32x16, Simd};
+use std::simd::{LaneCount, Simd, SupportedLaneCount};
 
 mod gen;
 pub use gen::{gen, Policy};
 
 // basic linear
-pub fn two_sum_linear(target: i32, arr: &[i32]) -> (usize, usize) {
+#[inline(never)]
+pub fn two_sum_linear_index(target: i32, arr: &[i32]) -> (usize, usize) {
+    for i in 0..arr.len() {
+        for j in i..arr.len() {
+            if arr[i] + arr[j] == target {
+                return (i, j);
+            }
+        }
+    }
+    (0, 0)
+}
+
+pub fn two_sum_linear_iter1(target: i32, arr: &[i32]) -> (usize, usize) {
     for (i, left) in arr.iter().enumerate() {
-        for (j, right) in arr.iter().skip(i).enumerate() {
+        for (j, right) in arr[i..].iter().enumerate() {
             if left + right == target {
                 return (i, i + j);
             }
@@ -18,18 +30,41 @@ pub fn two_sum_linear(target: i32, arr: &[i32]) -> (usize, usize) {
     (0, 0)
 }
 
+pub fn two_sum_linear_iter2(target: i32, arr: &[i32]) -> (usize, usize) {
+    for (i, left) in arr.iter().enumerate() {
+        let right = target - left;
+        if let Some(j) = arr.iter().skip(i).position(|x| *x == right) {
+            return (i, i + j);
+        }
+    }
+    (0, 0)
+}
+
 // linear using AVX-512 SIMD
-pub fn two_sum_linear_simd(target: i32, arr: &[i32]) -> (usize, usize) {
-    const LANES: usize = 16;
+pub fn two_sum_simd_512(target: i32, arr: &[i32]) -> (usize, usize) {
+    two_sum_simd::<16>(target, arr)
+}
+
+// linear using AVX-256 SIMD
+pub fn two_sum_simd_256(target: i32, arr: &[i32]) -> (usize, usize) {
+    two_sum_simd::<8>(target, arr)
+}
+
+fn two_sum_simd<const LANES: usize>(target: i32, arr: &[i32]) -> (usize, usize)
+where
+    LaneCount<LANES>: SupportedLaneCount,
+{
     for (i, left) in arr.iter().enumerate() {
         let need = target - left;
 
         let (before, simd_main, after) = arr[i..].as_simd::<LANES>();
-        if let Some(j) = before.iter().position(|&x| x == need) {
-            return (i, i + j);
+        for j in 0..before.len() {
+            if before[j] == need {
+                return (i, i + j);
+            }
         }
 
-        let simd_need: i32x16 = Simd::splat(need);
+        let simd_need: Simd<i32, LANES> = Simd::splat(need);
         for (chunk_num, chunk) in simd_main.iter().enumerate() {
             let mask = chunk.lanes_eq(simd_need);
             if mask.any() {
@@ -42,8 +77,10 @@ pub fn two_sum_linear_simd(target: i32, arr: &[i32]) -> (usize, usize) {
             }
         }
 
-        if let Some(j) = after.iter().position(|&x| x == need) {
-            return (i, i + j + before.len() + simd_main.len() * LANES);
+        for j in 0..after.len() {
+            if after[j] == need {
+                return (i, i + j + before.len() + simd_main.len() * LANES);
+            }
         }
     }
     (0, 0)
@@ -51,7 +88,20 @@ pub fn two_sum_linear_simd(target: i32, arr: &[i32]) -> (usize, usize) {
 
 // map
 pub fn two_sum_map(target: i32, arr: &[i32]) -> (usize, usize) {
-    let mut m = HashMap::new();
+    let mut m = HashMap::with_capacity(arr.len());
+    for i in 0..arr.len() {
+        m.insert(arr[i], i);
+    }
+    for i in 0..arr.len() {
+        if let Some(j) = m.get(&(target - arr[i])) {
+            return (i, *j);
+        }
+    }
+    (0, 0)
+}
+
+pub fn two_sum_map_iter(target: i32, arr: &[i32]) -> (usize, usize) {
+    let mut m = HashMap::with_capacity(arr.len());
     for (i, val) in arr.iter().enumerate() {
         m.insert(val, i);
     }

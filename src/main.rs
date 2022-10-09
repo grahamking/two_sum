@@ -1,7 +1,7 @@
 #![feature(bench_black_box)]
 
 use core::hint::black_box;
-use two_sum::{gen, two_sum_linear, two_sum_linear_simd, two_sum_map, Policy};
+use two_sum::{gen, two_sum_linear_index, two_sum_map, two_sum_simd_512, Policy};
 
 const REPS: usize = 1_000_000;
 
@@ -10,8 +10,8 @@ fn main() {
     let t = gen(args.next().unwrap().parse().unwrap(), Policy::Mid);
 
     let func = match args.next().unwrap().as_str() {
-        "l" => two_sum_linear,
-        "s" => two_sum_linear_simd,
+        "l" => two_sum_linear_index,
+        "s" => two_sum_simd_512,
         "m" => two_sum_map,
         _ => panic!("two_sum n l|s|m"),
     };
