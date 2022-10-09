@@ -8,6 +8,11 @@ pub fn compare(c: &mut Criterion) {
     let mut group = c.benchmark_group("bench");
     for i in (100..=1000).step_by(100) {
         let t = gen(i, Policy::Mid);
+        /*
+        group.bench_function(BenchmarkId::new("Linear", i), |b| {
+            b.iter(|| black_box(two_sum_linear_index(t.target, &t.v)))
+        });
+        */
         group.bench_function(BenchmarkId::new("SIMD", i), |b| {
             b.iter(|| black_box(two_sum_simd_512(t.target, &t.v)))
         });
