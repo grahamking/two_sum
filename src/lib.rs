@@ -94,7 +94,9 @@ pub fn two_sum_map(target: i32, arr: &[i32]) -> (usize, usize) {
     }
     for i in 0..arr.len() {
         if let Some(j) = m.get(&(target - arr[i])) {
-            return (i, *j);
+            if i != *j {
+                return (i, *j);
+            }
         }
     }
     (0, 0)
@@ -107,7 +109,9 @@ pub fn two_sum_map_iter(target: i32, arr: &[i32]) -> (usize, usize) {
     }
     for (i, val) in arr.iter().enumerate() {
         if let Some(j) = m.get(&(target - val)) {
-            return (i, *j);
+            if i != *j {
+                return (i, *j);
+            }
         }
     }
     (0, 0)
@@ -117,7 +121,7 @@ pub fn two_sum_map_iter(target: i32, arr: &[i32]) -> (usize, usize) {
 // Needs gen by 16 too
 pub fn _two_sum_linear_pad(target: i32, arr: &[i32]) -> (usize, usize) {
     for (i, left) in arr.iter().step_by(16).enumerate() {
-        for (j, right) in arr.iter().step_by(16).skip(i).enumerate() {
+        for (j, right) in arr.iter().step_by(16).skip(i + 1).enumerate() {
             if left + right == target {
                 return (i * 16, i * 16 + j * 16);
             }
