@@ -41,10 +41,12 @@ fn gen_rand_target(v: &[i32]) -> i32 {
 }
 
 fn gen_last_target(v: &[i32]) -> i32 {
+    assert!(v.len() > 2);
     v[v.len() - 1] + v[v.len() - 2]
 }
 
 fn gen_mid_target(v: &[i32]) -> i32 {
+    assert!(v.len() > 2);
     let mid = v.len() / 2;
     v[mid - 1] + v[mid + 1]
 }

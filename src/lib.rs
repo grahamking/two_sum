@@ -4,13 +4,13 @@ use std::collections::HashMap;
 use std::simd::{LaneCount, Simd, SupportedLaneCount};
 
 mod gen;
-pub use gen::{gen, Policy};
+pub use gen::{gen, Policy, TestCase};
 
 // basic linear
 #[inline(never)]
 pub fn two_sum_linear_index(target: i32, arr: &[i32]) -> (usize, usize) {
     for i in 0..arr.len() {
-        for j in i..arr.len() {
+        for j in (i + 1)..arr.len() {
             if arr[i] + arr[j] == target {
                 return (i, j);
             }
@@ -21,9 +21,9 @@ pub fn two_sum_linear_index(target: i32, arr: &[i32]) -> (usize, usize) {
 
 pub fn two_sum_linear_iter1(target: i32, arr: &[i32]) -> (usize, usize) {
     for (i, left) in arr.iter().enumerate() {
-        for (j, right) in arr[i..].iter().enumerate() {
+        for (j, right) in arr[(i + 1)..].iter().enumerate() {
             if left + right == target {
-                return (i, i + j);
+                return (i, i + 1 + j);
             }
         }
     }
@@ -33,8 +33,8 @@ pub fn two_sum_linear_iter1(target: i32, arr: &[i32]) -> (usize, usize) {
 pub fn two_sum_linear_iter2(target: i32, arr: &[i32]) -> (usize, usize) {
     for (i, left) in arr.iter().enumerate() {
         let right = target - left;
-        if let Some(j) = arr.iter().skip(i).position(|x| *x == right) {
-            return (i, i + j);
+        if let Some(j) = arr.iter().skip(i + 1).position(|x| *x == right) {
+            return (i, i + 1 + j);
         }
     }
     (0, 0)
@@ -57,10 +57,10 @@ where
     for (i, left) in arr.iter().enumerate() {
         let need = target - left;
 
-        let (before, simd_main, after) = arr[i..].as_simd::<LANES>();
+        let (before, simd_main, after) = arr[(i + 1)..].as_simd::<LANES>();
         for j in 0..before.len() {
             if before[j] == need {
-                return (i, i + j);
+                return (i, i + 1 + j);
             }
         }
 
@@ -71,7 +71,7 @@ where
                 // found it
                 for j in 0..LANES {
                     if mask.test(j) {
-                        return (i, i + before.len() + chunk_num * LANES + j);
+                        return (i, i + 1 + before.len() + chunk_num * LANES + j);
                     }
                 }
             }
@@ -79,7 +79,7 @@ where
 
         for j in 0..after.len() {
             if after[j] == need {
-                return (i, i + j + before.len() + simd_main.len() * LANES);
+                return (i, i + 1 + j + before.len() + simd_main.len() * LANES);
             }
         }
     }
