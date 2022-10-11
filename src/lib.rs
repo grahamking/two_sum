@@ -117,6 +117,17 @@ pub fn two_sum_map_iter(target: i32, arr: &[i32]) -> (usize, usize) {
     (0, 0)
 }
 
+pub fn two_sum_map_onepass(target: i32, arr: &[i32]) -> (usize, usize) {
+    let mut m = HashMap::with_capacity(arr.len());
+    for i in 0..arr.len() {
+        if let Some(j) = m.get(&(target - arr[i])) {
+            return (i, *j);
+        }
+        m.insert(arr[i], i);
+    }
+    (0, 0)
+}
+
 // basic linear but pad data so that each value is in it's own cache line
 // Needs gen by 16 too
 pub fn _two_sum_linear_pad(target: i32, arr: &[i32]) -> (usize, usize) {

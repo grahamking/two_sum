@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use two_sum::{
     gen, two_sum_linear_index, two_sum_linear_iter1, two_sum_linear_iter2, two_sum_map,
-    two_sum_map_iter, two_sum_simd_256, two_sum_simd_512, Policy,
+    two_sum_map_iter, two_sum_map_onepass, two_sum_simd_256, two_sum_simd_512, Policy,
 };
 
 pub fn compare(c: &mut Criterion) {
@@ -16,8 +16,11 @@ pub fn compare(c: &mut Criterion) {
         group.bench_function(BenchmarkId::new("SIMD", i), |b| {
             b.iter(|| black_box(two_sum_simd_512(t.target, &t.v)))
         });
-        group.bench_function(BenchmarkId::new("Map", i), |b| {
+        group.bench_function(BenchmarkId::new("Map TwoPass", i), |b| {
             b.iter(|| black_box(two_sum_map(t.target, &t.v)))
+        });
+        group.bench_function(BenchmarkId::new("Map OnePass", i), |b| {
+            b.iter(|| black_box(two_sum_map_onepass(t.target, &t.v)))
         });
     }
     group.finish();
@@ -61,6 +64,9 @@ pub fn compare_map(c: &mut Criterion) {
     });
     group.bench_function("map_iter", |b| {
         b.iter(|| black_box(two_sum_map_iter(t.target, &t.v)))
+    });
+    group.bench_function("map_onepass", |b| {
+        b.iter(|| black_box(two_sum_map_onepass(t.target, &t.v)))
     });
     group.finish();
 }
