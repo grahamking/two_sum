@@ -1,5 +1,3 @@
-#![feature(bench_black_box)]
-
 use core::hint::black_box;
 use two_sum::{gen, two_sum_linear_index, two_sum_map, two_sum_simd_512, Policy};
 

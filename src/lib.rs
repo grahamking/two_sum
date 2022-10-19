@@ -1,7 +1,7 @@
 #![feature(portable_simd)]
 
 use std::collections::HashMap;
-use std::simd::{LaneCount, Simd, SupportedLaneCount};
+use std::simd::{Simd, SimdPartialEq, ToBitMask};
 
 mod gen;
 pub use gen::{gen, Policy, TestCase};
@@ -42,18 +42,18 @@ pub fn two_sum_linear_iter2(target: i32, arr: &[i32]) -> (usize, usize) {
 
 // linear using AVX-512 SIMD
 pub fn two_sum_simd_512(target: i32, arr: &[i32]) -> (usize, usize) {
-    two_sum_simd::<16>(target, arr)
+    two_sum_simd(target, arr)
 }
 
 // linear using AVX-256 SIMD
-pub fn two_sum_simd_256(target: i32, arr: &[i32]) -> (usize, usize) {
-    two_sum_simd::<8>(target, arr)
-}
+// commented out because the new ToBitMask and const generics don't work together any more
+// maybe because of this: https://github.com/rust-lang/portable-simd/pull/239
+//pub fn two_sum_simd_256(target: i32, arr: &[i32]) -> (usize, usize) {
+//    two_sum_simd::<8>(target, arr)
+//}
 
-fn two_sum_simd<const LANES: usize>(target: i32, arr: &[i32]) -> (usize, usize)
-where
-    LaneCount<LANES>: SupportedLaneCount,
-{
+fn two_sum_simd(target: i32, arr: &[i32]) -> (usize, usize) {
+    const LANES: usize = 16;
     for (i, left) in arr.iter().enumerate() {
         let need = target - left;
 
@@ -66,14 +66,11 @@ where
 
         let simd_need: Simd<i32, LANES> = Simd::splat(need);
         for (chunk_num, chunk) in simd_main.iter().enumerate() {
-            let mask = chunk.lanes_eq(simd_need);
+            let mask = chunk.simd_eq(simd_need);
             if mask.any() {
                 // found it
-                for j in 0..LANES {
-                    if mask.test(j) {
-                        return (i, i + 1 + before.len() + chunk_num * LANES + j);
-                    }
-                }
+                let j = mask.to_bitmask().trailing_zeros() as usize;
+                return (i, i + 1 + before.len() + chunk_num * LANES + j);
             }
         }
 

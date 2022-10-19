@@ -1,7 +1,7 @@
 use criterion::{black_box, criterion_group, criterion_main, BenchmarkId, Criterion};
 use two_sum::{
     gen, two_sum_linear_index, two_sum_linear_iter1, two_sum_linear_iter2, two_sum_map,
-    two_sum_map_iter, two_sum_map_onepass, two_sum_simd_256, two_sum_simd_512, Policy,
+    two_sum_map_iter, two_sum_map_onepass, two_sum_simd_512, Policy,
 };
 
 pub fn compare(c: &mut Criterion) {
@@ -71,6 +71,7 @@ pub fn compare_map(c: &mut Criterion) {
     group.finish();
 }
 
+/*
 pub fn compare_simd(c: &mut Criterion) {
     let mut group = c.benchmark_group("compare_simd");
     let t = gen(REPS, Policy::Last);
@@ -83,6 +84,7 @@ pub fn compare_simd(c: &mut Criterion) {
 
     group.finish();
 }
+*/
 
 criterion_group!(
     benches,
@@ -90,6 +92,6 @@ criterion_group!(
     single,
     compare_linear,
     compare_map,
-    compare_simd
+    //compare_simd
 );
 criterion_main!(benches);
